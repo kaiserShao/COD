@@ -1,0 +1,7 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<root>
+<machinearm addr="1" />
+<spectrophotometer addr="2" /> 
+<microwavedigestion addr="3" />
+<serialport name="COM6" band="115200" databit="8" parity="0" stopbit="0" flow="0"/>
+</root>
