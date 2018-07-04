@@ -79,10 +79,14 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="APPDEF.H" />
     <ClInclude Include="BaseInterface.h" />
+    <ClInclude Include="CMDBase.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </ClInclude>
     <ClInclude Include="codplc.h" />
-    <ClInclude Include="CodPLCInterface.h" />
+    <ClInclude Include="CodPLCInterface.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </ClInclude>
     <ClInclude Include="DEBUG.H" />
     <ClInclude Include="dllcomon.h" />
   </ItemGroup>
@@ -90,6 +94,7 @@
     <ClCompile Include="CMD.c" />
     <ClCompile Include="codplc.c" />
     <ClCompile Include="ProcessControl.c" />
+    <ClCompile Include="TubeAllot.C" />
   </ItemGroup>
   <ItemGroup>
     <None Include="codplc.def" />

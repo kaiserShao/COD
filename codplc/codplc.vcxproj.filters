@@ -27,10 +27,10 @@
     <ClInclude Include="dllcomon.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="APPDEF.H">
+    <ClInclude Include="DEBUG.H">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="DEBUG.H">
+    <ClInclude Include="CMDBase.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
@@ -42,6 +42,9 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="ProcessControl.c">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="TubeAllot.C">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

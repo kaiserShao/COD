@@ -4,7 +4,7 @@
     <ShowAllFiles>false</ShowAllFiles>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <LocalDebuggerCommand>D:\cod\all\codplc\Debug\codrun.exe</LocalDebuggerCommand>
+    <LocalDebuggerCommand>F:\ZT\cod\all\codplc\Debug\codrun.exe</LocalDebuggerCommand>
     <LocalDebuggerCommandArguments>$(TargetFileName)</LocalDebuggerCommandArguments>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
   </PropertyGroup>

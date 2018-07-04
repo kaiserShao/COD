@@ -6,56 +6,50 @@
 #include "stdint.h"
 #include "stdbool.h"
 #include "string.h"
-//#include "cmsis_os.h"
 #include "BaseInterface.h"
-//#include "MBM.H"
-//extern	uint16_t	usRegHoldingBuf1[];
-//extern	uint16_t	usRegHoldingBuf2[];
-//extern	uint16_t	usRegHoldingBuf3[];
 typedef	uint8_t		ProcessErr;
 #ifndef _Bool
 #define _Bool bool
 #endif
-void osDelay(int nDelay);
-//extern	eMBErrorCode	HoldingSingelWrite1( uint16_t  Numbler, uint16_t	Data );
-//extern	uint16_t	HoldingSingelRead1( uint16_t  Numbler );
+
+void	osDelay(int nDelay);
 extern	_Bool	HoldingSingelWrite2(const	char *lpName, uint16_t	Data);
 extern	uint16_t	HoldingSingelRead2(const	char *lpName);
-//extern	eMBErrorCode	HoldingSingelWrite3( uint16_t  Numbler, uint16_t	Data );
-//extern	uint16_t	HoldingSingelRead3( uint16_t  Numbler );
 extern	const	char * MBName[];
-
 extern	void	PRINTErr(char *s, ProcessErr Err);
 
-extern	void	Processx();
 #define	SPECTROPHOTOMETRY 0x01u
-#define	ARMRBOOT 0x02u
-#define	DISSOLVE 0x03u
-
-#define	TubeMax	180u
-#define	Full	23000
-#define	ArmBase 70u
-#define	PumpZero	2
-#define	Clean	7000
+#define	ARMRBOOT		0x02u
+#define	DISSOLVE		0x03u
+#define Retry			30u
+#define	TubeMax			180u
+#define	PumpPositionMax	22000
+#define	Full			20000
+#define	ArmBase			70u
+#define	SpeBase			30u
+#define	PumpZero		2
+#define	Clean			7000
 #define	DosageType2 	2000
 #define	DosageType4		5000
 #define	DosageType5 	5000
 #define	DosageType6 	500
 #define	DosageType7 	200
 
-#define	M_Type1		3000u
-#define	M_Type2		8000u
-#define	M_Type10	10000u
+#define	MBRetry			4
+#define	M_Type1			3000u
+#define	M_Type2			8000u
+#define	M_Type10		10000u
 
 
-enum	enumStatus
+
+enum	enumStatus	//	公共管状态 空/非空
 {
 	StatusBlank = 0u,
 	StatusNonblank,
 	StatusMax,
 };
 
-enum	enumType
+enum	enumType	//	试样通道号
 {
 	TypeErr = 0u,
 	Type1 = 1u,
@@ -72,7 +66,7 @@ enum	enumType
 	TypeMax,
 };
 
-enum	ProErr
+enum	ProErr	//	流程错误信息
 {
 	ProNOErr = 0u,
 	ProPumpBlockingErr,
@@ -80,56 +74,76 @@ enum	ProErr
 	ProPumpPositionErr,
 	ProValveErr,
 	ProCommonErr,
-	ProNoWater,
-	ProNoWaterFirst,
-	ProNoWaterLast,
+	ProNoFluid,
 	ProArmXErr,
 	ProArmYErr,
 	ProArmZErr,
 	ProReagentErr,
+	ProMBReadErr,
+	ProMBWriteErr,
+	ProBusy,
 	ProErrNoDef = 0xFFu,
 };
 
 
-enum	enumTubeState
+enum	enumTubeState	//	试剂量程 未知/高/低
 {
 	StateUnknown,
 	StateHigh,
 	StateLow,
 };
 
-struct	uTubeReagent
+struct	uTubeReagent	//	试管状态
 {
-	int16_t	Water;
+
+	uint8_t	Useing;					//	是否正在使用
+
+	uint8_t	SampleFrom;				//	水样源
+	uint8_t	Function;				//	功能	// 1 测氯 2 
+	uint8_t	NumWithInGroup;			//	组内编号
+
+	int16_t	Water;					//	各种试剂的量
 	int16_t	LowLevel;
 	int16_t	HighLevel;
 	int16_t	AgNo3;
 	int16_t	KCrO;
 	int16_t	Sample;
-	int16_t	Sum;
-	int16_t	CleanCount;
-	int16_t	ConcentrationValue;
-	enum	enumTubeState	ChloridionHL;
-	enum	enumTubeState	ConcentrationHL;
-	//bool	TubeMix;
-	//bool	HeatTime;
-	//bool	DataValid;
-};
-//extern	struct	uTubeReagent	TubeReagent[TubeMax];
+	int16_t	Sum;					//	试剂总量
 
-struct	uRTStatus
+	uint8_t	CleanCount;				//	清洗次数
+
+	enum	enumTubeState	ChloridionHL;		//	氯离子浓度高低
+	enum	enumTubeState	ConcentrationHL;	//	待测液浓度高低
+
+	int16_t	ConcentrationValue;					//	浓度值
+
+};
+struct	uRTStatus			//	实时状态
 {
-	enum	enumStatus	Exist[TypeMax];
-	enum	enumStatus	Common;
-	enum	enumType	Channel;
-	uint16_t	HeatRealTemp;
-	uint16_t	PumpPosition;
-	uint16_t	RbootArmPosition[3u];
-	uint16_t	Concentration[4u];
+	enum	enumStatus	Exist[TypeMax];	//	试剂是否存在
+	enum	enumStatus	Common;			//	公共管状态
+	enum	enumType	Channel;		//	转换阀当前通道（当前试剂）
+	uint16_t	HeatRealTemp;			//	消解器实时温度
+	uint16_t	PumpPosition;			//	注射泵实时位置
+	uint16_t	RbootArmPosition[3u];	//	机械臂实时位置
+	uint16_t	Concentration[4u];		//	浓度值实时数据（暂时不使用）
 	struct	uTubeReagent	TubeReagent[TubeMax];
 };
-extern	struct	uRTStatus RTStatus;
+extern	struct	uRTStatus	RTStatus;	//	仪器运行的实时状态
 
+struct uResult			//	最终结果 
+{
+	uint8_t	Useing;					//	是否正在使用
+
+	uint8_t	SampleFrom;				//	水样源
+	uint8_t	Function;				//	功能
+	uint8_t	NumWithInGroup;			//	组内编号
+
+	enum	enumTubeState	ChloridionHL;		//	氯离子浓度高低
+	enum	enumTubeState	ConcentrationHL;	//	待测液浓度高低
+
+	int16_t	ConcentrationValue;					//	浓度值
+};
 enum	enumCommand
 {
 	CMDValve = 1u,
@@ -148,8 +162,7 @@ struct	uCMDs
 	int16_t	Control;
 };
 
-extern	ProcessErr	ProcessDeal(struct	uCMDs * CMDs, uint8_t CMDsLenth);
-
+extern	ProcessErr	ProcessDeal(enum enumCommand CMD, int16_t Value);
 
 #endif
 
